@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { identifyCard, CardIdentification } from '../services/ClaudeAPI';
+import { saveCard } from '../services/backendAPI';
 
 export default function ScanScreen({ navigation }: any) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -30,7 +31,7 @@ export default function ScanScreen({ navigation }: any) {
   // Take picture and identify card
   const takePicture = async () => {
     if (!cameraRef.current) return;
-
+  
     try {
       setLoading(true);
       
@@ -39,14 +40,30 @@ export default function ScanScreen({ navigation }: any) {
         base64: true,
         quality: 0.8,
       });
-
+  
       // Close camera
       setCameraActive(false);
-
+  
       // Call Claude API to identify card
       const cardData = await identifyCard(photo.base64);
       setIdentifiedCard(cardData);
-
+  
+      // 🆕 SAVE TO DATABASE
+      try {
+        await saveCard({
+          card_name: cardData.cardName,
+          set_name: cardData.setName,
+          card_number: cardData.cardNumber,
+          rarity: cardData.rarity,
+          condition: cardData.condition,
+          confidence: cardData.confidence,
+        });
+        console.log('✅ Card saved to database!');
+      } catch (saveError) {
+        console.error('Failed to save card to database:', saveError);
+        // Still show the card even if save fails
+      }
+  
     } catch (error) {
       console.error('Error identifying card:', error);
       Alert.alert('Error', 'Failed to identify card. Please try again.');
