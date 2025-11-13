@@ -48,18 +48,27 @@ export async function identifyCard(imageBase64: string): Promise<CardIdentificat
               },
               {
                 type: 'text',
-                text: `Analyze this Pokémon trading card image and extract the following information. Respond ONLY with valid JSON in this exact format:
+                text: `You are an expert at identifying Pokémon TCG cards. Analyze this card image carefully and extract ALL visible information.
+
+IMPORTANT: Look for these specific details:
+- Card name (usually at the top)
+- Set name and symbol (usually at bottom right or left)  
+- Card number (format: XX/XXX at bottom)
+- Rarity symbol (circle=common, diamond=uncommon, star=rare, star+holo=holo rare)
+- Condition based on visible wear, edges, corners
+
+Respond ONLY with valid JSON in this exact format:
 
 {
-  "cardName": "card name here",
-  "setName": "set name here", 
-  "cardNumber": "card number/total (e.g., 25/102)",
-  "rarity": "Common/Uncommon/Rare/Holo Rare/etc",
-  "condition": "Mint/Near Mint/Lightly Played/Moderately Played/Heavily Played/Damaged",
+  "cardName": "exact card name",
+  "setName": "set name or Unknown", 
+  "cardNumber": "XX/XXX or Unknown",
+  "rarity": "Common/Uncommon/Rare/Holo Rare/Ultra Rare",
+  "condition": "Mint/Near Mint/Lightly Played/Moderately Played/Heavily Played",
   "confidence": "High/Medium/Low"
 }
 
-If you cannot identify the card clearly, set confidence to "Low" and use "Unknown" for fields you're unsure about.`,
+Use "Unknown" only if you truly cannot see the information in the image.`,
               },
             ],
           },
