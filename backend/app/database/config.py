@@ -6,8 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Use SQLite for testing (will switch to PostgreSQL with Docker later)
+# Get DATABASE_URL from environment (Railway sets this automatically)
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./pokemarketai.db")
+
+# Railway uses postgresql:// but we need postgresql+psycopg://
+if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # Create SQLAlchemy engine
 engine = create_engine(
