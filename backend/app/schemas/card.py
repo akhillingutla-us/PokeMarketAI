@@ -12,6 +12,12 @@ class CardCreate(BaseModel):
     confidence: Optional[str] = None
     image_url: Optional[str] = None
     current_price: Optional[float] = None
+    
+    # NEW: Price fields
+    market_price: Optional[float] = None
+    low_price: Optional[float] = None
+    high_price: Optional[float] = None
+    last_price_update: Optional[datetime] = None
 
 # Schema for reading a card (includes DB fields)
 class CardResponse(CardCreate):

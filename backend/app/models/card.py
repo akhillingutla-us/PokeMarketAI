@@ -12,8 +12,15 @@ class Card(Base):
     rarity = Column(String, nullable=True)
     condition = Column(String, nullable=True)
     confidence = Column(String, nullable=True)
-    image_url = Column(String, nullable=True)  # We'll store images later
-    current_price = Column(Float, nullable=True)  # Price tracking later
+    image_url = Column(String, nullable=True)
+    
+    # Price fields
+    current_price = Column(Float, nullable=True)  # Keep for backwards compatibility
+    market_price = Column(Float, nullable=True)   # Current market price
+    low_price = Column(Float, nullable=True)      # Low price
+    high_price = Column(Float, nullable=True)     # High price
+    last_price_update = Column(DateTime(timezone=True), nullable=True)  # When prices were fetched
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
