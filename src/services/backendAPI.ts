@@ -17,7 +17,7 @@ export interface Card {
 // Save a card to the database
 export async function saveCard(card: Card): Promise<Card> {
   try {
-    const response = await fetch(`${API_URL}/cards/`, {
+    const response = await fetch(\`\${API_URL}/cards/\`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export async function saveCard(card: Card): Promise<Card> {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to save card: ${response.status}`);
+      throw new Error(\`Failed to save card: \${response.status}\`);
     }
 
     const savedCard = await response.json();
@@ -47,10 +47,10 @@ export async function saveCard(card: Card): Promise<Card> {
 // Get all cards from the database
 export async function getAllCards(): Promise<Card[]> {
   try {
-    const response = await fetch(`${API_URL}/cards/`);
+    const response = await fetch(\`\${API_URL}/cards/\`);
     
     if (!response.ok) {
-      throw new Error(`Failed to fetch cards: ${response.status}`);
+      throw new Error(\`Failed to fetch cards: \${response.status}\`);
     }
 
     const cards = await response.json();
@@ -64,12 +64,12 @@ export async function getAllCards(): Promise<Card[]> {
 // Delete a card
 export async function deleteCard(cardId: number): Promise<void> {
   try {
-    const response = await fetch(`${API_URL}/cards/${cardId}`, {
+    const response = await fetch(\`\${API_URL}/cards/\${cardId}\`, {
       method: 'DELETE',
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to delete card: ${response.status}`);
+      throw new Error(\`Failed to delete card: \${response.status}\`);
     }
   } catch (error) {
     console.error('Error deleting card:', error);
