@@ -31,6 +31,7 @@ export async function saveCard(card: Card): Promise<Card> {
       }),
     });
 
+    if (!response.ok) {
       throw new Error(`Failed to save card: ${response.status}`);
     }
 
@@ -46,6 +47,7 @@ export async function getAllCards(): Promise<Card[]> {
   try {
     const response = await fetch(`${API_URL}/cards/`);
     
+    if (!response.ok) {
       throw new Error(`Failed to fetch cards: ${response.status}`);
     }
 
@@ -63,6 +65,7 @@ export async function deleteCard(cardId: number): Promise<void> {
       method: 'DELETE',
     });
 
+    if (!response.ok) {
       throw new Error(`Failed to delete card: ${response.status}`);
     }
   } catch (error) {
