@@ -43,7 +43,7 @@ export default function PortfolioScreen() {
           onPress: async () => {
             try {
               await deleteCard(cardId);
-              await loadCards(); // Refresh the list
+              await loadCards();
               Alert.alert('Success', 'Card removed from collection');
             } catch (error) {
               Alert.alert('Error', 'Failed to delete card');
@@ -54,10 +54,20 @@ export default function PortfolioScreen() {
     );
   };
 
+  // Calculate total portfolio value
+  const totalValue = cards.reduce((sum, card) => {
+    return sum + (card.market_price || 0);
+  }, 0);
+
   const renderCard = ({ item }: { item: Card }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardName}>{item.card_name}</Text>
+        <View style={styles.cardTitleSection}>
+          <Text style={styles.cardName}>{item.card_name}</Text>
+          {item.market_price && (
+            <Text style={styles.marketPrice}>${item.market_price.toFixed(2)}</Text>
+          )}
+        </View>
         <TouchableOpacity
           onPress={() => handleDelete(item.id!, item.card_name)}
           style={styles.deleteButton}
@@ -65,11 +75,27 @@ export default function PortfolioScreen() {
           <Text style={styles.deleteText}>🗑️</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.cardDetails}>
         <CardDetail label="Set" value={item.set_name || 'Unknown'} />
         <CardDetail label="Number" value={item.card_number || 'Unknown'} />
         <CardDetail label="Rarity" value={item.rarity || 'Unknown'} />
         <CardDetail label="Condition" value={item.condition || 'Unknown'} />
+        
+        {/* Price Range */}
+        {item.low_price && item.high_price && (
+          <View style={styles.priceRange}>
+            <Text style={styles.priceRangeLabel}>Price Range:</Text>
+            <Text style={styles.priceRangeValue}>
+              ${item.low_price.toFixed(2)} - ${item.high_price.toFixed(2)}
+            </Text>
+          </View>
+        )}
+
+        {/* No price available message */}
+        {!item.market_price && (
+          <Text style={styles.noPriceText}>Price data unavailable</Text>
+        )}
       </View>
     </View>
   );
@@ -97,7 +123,14 @@ export default function PortfolioScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Collection</Text>
-        <Text style={styles.count}>{cards.length} cards</Text>
+        <View style={styles.stats}>
+          <Text style={styles.count}>{cards.length} cards</Text>
+          {totalValue > 0 && (
+            <Text style={styles.totalValue}>
+              Total Value: ${totalValue.toFixed(2)}
+            </Text>
+          )}
+        </View>
       </View>
       <FlatList
         data={cards}
@@ -139,11 +172,21 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 5,
+    marginBottom: 8,
+  },
+  stats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   count: {
     fontSize: 16,
     color: '#4CAF50',
+  },
+  totalValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFD700',
   },
   list: {
     padding: 15,
@@ -157,14 +200,22 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
+  },
+  cardTitleSection: {
+    flex: 1,
   },
   cardName: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
-    flex: 1,
+    marginBottom: 4,
+  },
+  marketPrice: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4CAF50',
   },
   deleteButton: {
     padding: 5,
@@ -187,6 +238,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     fontWeight: '600',
+  },
+  priceRange: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#3a3a4e',
+  },
+  priceRangeLabel: {
+    fontSize: 13,
+    color: '#aaa',
+  },
+  priceRangeValue: {
+    fontSize: 13,
+    color: '#FFD700',
+    fontWeight: '600',
+  },
+  noPriceText: {
+    fontSize: 13,
+    color: '#888',
+    fontStyle: 'italic',
+    marginTop: 8,
   },
   loadingText: {
     fontSize: 18,

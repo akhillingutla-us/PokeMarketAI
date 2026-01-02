@@ -10,6 +10,13 @@ export interface Card {
   confidence?: string;
   image_url?: string;
   current_price?: number;
+  
+  // NEW: Price fields
+  market_price?: number;
+  low_price?: number;
+  high_price?: number;
+  last_price_update?: string;
+  
   created_at?: string;
   updated_at?: string;
 }
