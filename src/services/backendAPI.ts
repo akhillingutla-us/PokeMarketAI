@@ -1,4 +1,4 @@
-const API_URL = 'https://pokemarketai-production.up.railway.app'; // Replace XXX with your IP!
+const API_URL = 'https://pokemarketai-backend.onrender.com';
 
 export interface Card {
   id?: number;
