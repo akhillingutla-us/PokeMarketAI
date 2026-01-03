@@ -91,8 +91,17 @@ class PriceHistoryService:
             if not price_history:
                 return {}
             
-            # Get prices as list
-            prices = list(price_history.values())
+            # Extract Near Mint condition prices (most common)
+            conditions = price_history.get('conditions', {})
+            near_mint = conditions.get('Near Mint', {})
+            history = near_mint.get('history', [])
+            
+            if len(history) < 2:
+                return {}
+            
+            # Extract prices from history
+            prices = [entry['market'] for entry in history if entry.get('market')]
+            
             if len(prices) < 2:
                 return {}
             
@@ -119,7 +128,8 @@ class PriceHistoryService:
                 'week_change_percent': round(week_change, 2),
                 'lowest_price': min(prices),
                 'highest_price': max(prices),
-                'average_price': round(sum(prices) / len(prices), 2)
+                'average_price': round(sum(prices) / len(prices), 2),
+                'total_data_points': len(prices)
             }
             
         except Exception as e:
