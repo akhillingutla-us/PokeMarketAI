@@ -21,6 +21,25 @@ export interface Card {
   updated_at?: string;
 }
 
+// NEW: Price History Interface
+export interface PriceHistory {
+  card_id: number;
+  card_name: string;
+  set_name: string;
+  current_price: number;
+  price_history: any;
+  trend_analysis: {
+    trend: string;
+    week_change_percent: number;
+    lowest_price: number;
+    highest_price: number;
+    average_price: number;
+    total_data_points: number;
+  };
+  last_updated: string;
+  message?: string;
+}
+
 export async function saveCard(card: Card): Promise<Card> {
   try {
     const response = await fetch(`${API_URL}/cards/`, {
@@ -77,6 +96,21 @@ export async function deleteCard(cardId: number): Promise<void> {
     }
   } catch (error) {
     console.error('Error deleting card:', error);
+    throw error;
+  }
+}
+
+export async function getCardPriceHistory(cardId: number): Promise<PriceHistory> {
+  try {
+    const response = await fetch(`${API_URL}/cards/${cardId}/price-history`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch price history: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching price history:', error);
     throw error;
   }
 }

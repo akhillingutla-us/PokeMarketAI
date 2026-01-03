@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ScanScreen from '../screens/ScanScreen';
 import PortfolioScreen from '../screens/PortfolioScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
@@ -35,6 +36,11 @@ export default function AppNavigator() {
           name="Portfolio" 
           component={PortfolioScreen}
           options={{ tabBarLabel: 'Portfolio' }}
+        />
+        <Tab.Screen 
+          name="Analytics" 
+          component={AnalyticsScreen}
+          options={{ tabBarLabel: 'Analytics' }}
         />
         <Tab.Screen 
           name="Profile" 

@@ -1,3 +1,4 @@
+from app.services.ai_insights_service import AIInsightsService
 from app.services.price_history_service import PriceHistoryService
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -75,6 +76,51 @@ def get_card_price_history(card_id: int, db: Session = Depends(get_db)):
         "price_history": history_data.get('price_history'),
         "trend_analysis": trend_analysis,
         "last_updated": history_data.get('last_updated')
+    }
+
+@router.get("/{card_id}/ai-insights")
+async def get_ai_insights(card_id: int, db: Session = Depends(get_db)):
+    """Get AI-powered insights for a card"""
+    
+    # Get card
+    card = db.query(Card).filter(Card.id == card_id).first()
+    if not card:
+        raise HTTPException(status_code=404, detail="Card not found")
+    
+    # Get price history
+    price_history_data = PriceHistoryService.get_price_history(
+        card.card_name, 
+        card.set_name
+    )
+    
+    if not price_history_data:
+        return {
+            "card_id": card_id,
+            "card_name": card.card_name,
+            "message": "Unable to generate insights - no price data available"
+        }
+    
+    # Analyze trend
+    trend_analysis = PriceHistoryService.analyze_trend(
+        price_history_data.get('price_history', {})
+    )
+    
+    # Generate AI insights
+    ai_insights = AIInsightsService.generate_insights(
+        card_name=card.card_name,
+        set_name=card.set_name or "Unknown",
+        current_price=card.market_price or 0,
+        trend_analysis=trend_analysis,
+        price_history=price_history_data.get('price_history', {})
+    )
+    
+    return {
+        "card_id": card_id,
+        "card_name": card.card_name,
+        "set_name": card.set_name,
+        "current_price": card.market_price,
+        "ai_insights": ai_insights,
+        "trend_analysis": trend_analysis
     }
 
 # Get a single card by ID (AFTER /price-history)
