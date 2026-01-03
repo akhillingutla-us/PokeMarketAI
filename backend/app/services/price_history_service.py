@@ -17,9 +17,6 @@ class PriceHistoryService:
     def get_price_history(card_name: str, set_name: str = None, days: int = 90) -> Optional[Dict]:
         """
         Get price history for a card (up to 7 days on free tier)
-        
-        Returns:
-            Dict with card info and price history, or None if not found
         """
         try:
             api_key = PriceHistoryService.get_api_key()
@@ -27,18 +24,17 @@ class PriceHistoryService:
                 print("ERROR: No PokemonPriceTracker API key found")
                 return None
             
-            print(f"DEBUG: API Key exists: {bool(api_key)}, Length: {len(api_key)}")
-            
-            # Build search params
+            # Build search params - USE 'search' NOT 'name'
             params = {
-                'name': card_name,
+                'search': card_name,  # ✅ FIXED
                 'limit': 1,
-                'includeHistory': 'true'  # Some APIs want string, not boolean
+                'includeHistory': 'true'
             }
             
-            print(f"DEBUG: Request URL: {PriceHistoryService.BASE_URL}/cards")
+            if set_name and set_name != "Unknown":
+                params['setName'] = set_name  # Also use setName not set
+            
             print(f"DEBUG: Request params: {params}")
-            print(f"DEBUG: Auth header: Bearer {api_key[:10]}...")
             
             response = requests.get(
                 f"{PriceHistoryService.BASE_URL}/cards",
@@ -48,8 +44,6 @@ class PriceHistoryService:
             )
             
             print(f"DEBUG: Response Status: {response.status_code}")
-            print(f"DEBUG: Response Headers: {dict(response.headers)}")
-            print(f"DEBUG: Response Body: {response.text[:500]}")  # First 500 chars
             
             if response.status_code != 200:
                 print(f"API Error {response.status_code}: {response.text}")
@@ -62,16 +56,17 @@ class PriceHistoryService:
                 return None
             
             card_data = data['data'][0]
-            print(f"Found card: {card_data.get('name')}")
+            print(f"✓ Found card: {card_data.get('name')}")
             
             # Extract price history
             price_history = card_data.get('priceHistory', {})
             
             if not price_history:
-                print(f"No price history in response (available fields: {list(card_data.keys())})")
+                print(f"No price history (fields: {list(card_data.keys())})")
                 return None
             
-            # Format the response
+            print(f"✓ Got {len(price_history)} days of price history!")
+            
             return {
                 'card_id': card_data.get('tcgPlayerId') or card_data.get('id'),
                 'card_name': card_data.get('name'),
