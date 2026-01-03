@@ -1,6 +1,6 @@
 import requests
 from typing import Optional, Dict, List
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 
 class PriceHistoryService:
@@ -14,49 +14,6 @@ class PriceHistoryService:
         return os.getenv('POKEMON_PRICE_TRACKER_API_KEY', '')
     
     @staticmethod
-    def search_card(card_name: str, set_name: str = None) -> Optional[Dict]:
-        """
-        Search for a card to get its ID
-        """
-        try:
-            api_key = PriceHistoryService.get_api_key()
-            if not api_key:
-                print("No PokemonPriceTracker API key found")
-                return None
-            
-            # Build search query
-            params = {
-                'name': card_name,
-                'limit': 1
-            }
-            
-            if set_name and set_name != "Unknown":
-                params['set'] = set_name
-            
-            response = requests.get(
-                f"{PriceHistoryService.BASE_URL}/cards",
-                headers={'Authorization': f'Bearer {api_key}'},
-                params=params,
-                timeout=15
-            )
-            
-            if response.status_code != 200:
-                print(f"API Error: {response.status_code}")
-                return None
-            
-            data = response.json()
-            
-            if not data.get('data') or len(data['data']) == 0:
-                print(f"No cards found for: {card_name}")
-                return None
-            
-            return data['data'][0]
-            
-        except Exception as e:
-            print(f"Error searching card: {e}")
-            return None
-    
-    @staticmethod
     def get_price_history(card_name: str, set_name: str = None, days: int = 90) -> Optional[Dict]:
         """
         Get price history for a card (up to 90 days)
@@ -65,22 +22,55 @@ class PriceHistoryService:
             Dict with card info and price history, or None if not found
         """
         try:
-            # First, search for the card to get its data
-            card_data = PriceHistoryService.search_card(card_name, set_name)
-            
-            if not card_data:
+            api_key = PriceHistoryService.get_api_key()
+            if not api_key:
+                print("No PokemonPriceTracker API key found")
                 return None
             
-            # Extract price history if available
+            # Build search params - include history
+            params = {
+                'name': card_name,
+                'limit': 1,
+                'includeHistory': 'true'  # IMPORTANT: Request price history
+            }
+            
+            if set_name and set_name != "Unknown":
+                params['setName'] = set_name
+            
+            print(f"Requesting price history with params: {params}")
+            
+            response = requests.get(
+                f"{PriceHistoryService.BASE_URL}/cards",
+                headers={'Authorization': f'Bearer {api_key}'},
+                params=params,
+                timeout=20
+            )
+            
+            print(f"API Response Status: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"API Error {response.status_code}: {response.text}")
+                return None
+            
+            data = response.json()
+            
+            if not data.get('data') or len(data['data']) == 0:
+                print(f"No cards found for: {card_name}")
+                return None
+            
+            card_data = data['data'][0]
+            print(f"Found card: {card_data.get('name')}")
+            
+            # Extract price history
             price_history = card_data.get('priceHistory', {})
             
             if not price_history:
-                print(f"No price history available for {card_name}")
+                print(f"No price history in response")
                 return None
             
             # Format the response
             return {
-                'card_id': card_data.get('tcgPlayerId'),
+                'card_id': card_data.get('tcgPlayerId') or card_data.get('id'),
                 'card_name': card_data.get('name'),
                 'set_name': card_data.get('setName'),
                 'current_price': card_data.get('prices', {}).get('market'),
@@ -90,6 +80,8 @@ class PriceHistoryService:
             
         except Exception as e:
             print(f"Error fetching price history: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     @staticmethod
