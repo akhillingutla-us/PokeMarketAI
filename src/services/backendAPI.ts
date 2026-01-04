@@ -40,6 +40,29 @@ export interface PriceHistory {
   message?: string;
 }
 
+export interface AIInsights {
+  card_id: number;
+  card_name: string;
+  set_name: string;
+  current_price: number;
+  ai_insights: {
+    prediction: string;
+    recommendation: 'BUY' | 'HOLD' | 'SELL';
+    reasoning: string;
+    confidence: number;
+    generated_at: string;
+  };
+  trend_analysis: {
+    trend: string;
+    week_change_percent: number;
+    lowest_price: number;
+    highest_price: number;
+    average_price: number;
+    total_data_points: number;
+  };
+  message?: string;
+}
+
 export async function saveCard(card: Card): Promise<Card> {
   try {
     const response = await fetch(`${API_URL}/cards/`, {
@@ -111,6 +134,21 @@ export async function getCardPriceHistory(cardId: number): Promise<PriceHistory>
     return await response.json();
   } catch (error) {
     console.error('Error fetching price history:', error);
+    throw error;
+  }
+}
+
+export async function getCardAIInsights(cardId: number): Promise<AIInsights> {
+  try {
+    const response = await fetch(`${API_URL}/cards/${cardId}/ai-insights`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch AI insights: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching AI insights:', error);
     throw error;
   }
 }

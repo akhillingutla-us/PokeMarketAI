@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.config import engine, Base
-from app.routers import cards
+from app.routers import cards, price_history  # Add price_history import
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -25,6 +25,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(cards.router)
+app.include_router(price_history.router)  # Add this line
 
 # Health check endpoint
 @app.get("/")
